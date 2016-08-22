@@ -4,6 +4,7 @@ function X=matrix_completion_sparse(A,d,Omega,X0,options)
 % d-diagonal indices of A
 % Omega- visible indices:consists of n vectors, must be symmetric;
 % X0 initial-all zeros
+mex root_c.c
 
 n=size(A,2);
 X=X0;
@@ -19,25 +20,32 @@ normA=matrix_norm(A);
 k=size(X0,2);
 for iter=1:options.maxiter
 	fprintf('#%d, observed error=%f\n',iter,f(R,normA));
+	tic;
 	for i=1:k
-	
+		
+		% the updating part takes 0.6 seconds
 		x=X(:,i);
 		%R=R+x*x';
 		for t=1:n
 			R{t}=R{t}+x(t)*x(Omega{t});
 		end
+
+		% this for loop takes 1.4 seconds, in which root_c takes 0.7 seconds
 		for j=1:n
 			id=Omega{j};
 			p=norm(x(id))^2-x(j)^2-R{j}(d(j));
 			q=-x(id)'*R{j}+R{j}(d(j))*x(j);% need to save diagonal part for efficient call
-			x(j)=root(p,q);
+			x(j)=root_c(p,q);
 		end
+		
 		%R=R-x*x';
 		for t=1:n
 			R{t}=R{t}-x(t)*x(Omega{t});
 		end
 		X(:,i)=x;
 	end
+
+	toc
 end
 
 end
