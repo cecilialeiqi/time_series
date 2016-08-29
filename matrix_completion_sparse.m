@@ -29,7 +29,6 @@ for iter=1:options.maxiter
 		for t=1:n
 			R{t}=R{t}+x(t)*x(Omega{t});
 		end
-
 		% this for loop takes 1.4 seconds, in which root_c takes 0.7 seconds
 		for j=1:n
 			id=Omega{j};

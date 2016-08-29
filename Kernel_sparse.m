@@ -17,7 +17,7 @@ function [D,Omega,d]=Kernel_sparse(X,n,m)
 	idj=idj(1:(m-n)/2);
 	% still need to remove same indices...
 	
-	v=zeros((m-n)/2,1);
+	v=zeros(floor((m-n)/2),1);
     nrm=zeros(n,1);
 	tic;
 	for i=1:n
@@ -38,18 +38,33 @@ function [D,Omega,d]=Kernel_sparse(X,n,m)
 	col=[idi;idj;(1:n)'];
 	row=[idj;idi;(1:n)'];
 	v=[v;v;ones(n,1)];
-	size(col)
+	m=size(col)
 	size(row)
 	size(v)
+	[col,I]=sort(col);
+	row=row(I);
+	v=v(I);
 	%S=sparse(idx,idy,v,n,n);	
     % has to do this step, since there might be duplicates
     %[row,col,v]=find(S);
+	start=1;
+	nd=1;
 	for i=1:n
-		id=find(col==i);
-		Omega{i}=row(id);
-		D{i}=v(id);
-		d(i)=find(Omega{i}==i);
+	    while (nd<=m && col(nd)==i)
+		nd=nd+1;
+	    end
+	    Omega{i}=row(start:nd-1);
+	    D{i}=v(start:nd-1);
+	    d(i)=find(Omega{i}==i);
+	    start=nd;
 	end
+
+	%for i=1:n
+	%	id=find(col==i);
+	%	Omega{i}=row(id);
+	%	D{i}=v(id);
+	%	d(i)=find(Omega{i}==i);
+	%end
 
     % now D is the kernel matrix required
 
